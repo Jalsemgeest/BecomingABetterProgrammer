@@ -30,7 +30,7 @@ function randomName() {
   return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
 }
 
-const hashTableLength = 15;
+const hashTableLength = 300;
 const listLength = 200;
 const list = [];
 for (let userCounter = 0; userCounter < listLength; userCounter++) {
@@ -47,7 +47,7 @@ const hashTable = [];
  * @return {String}     [Hash value based on the object]
  */
 function hash(obj) {
-  return obj.name.charCodeAt(0) % hashTableLength;
+  return obj.name.split('').map(a => a.charCodeAt(a)).reduce((a, b) => a + b, 0) % hashTableLength;
 }
 
 /**
