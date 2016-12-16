@@ -1,5 +1,6 @@
 package stacks;
 
+import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
@@ -22,8 +23,189 @@ public class Stacks {
 		 *  Insert 2 --> [ 0, 2, 3 ] --> Pop() --> [ 0, 0, 3 ]
 		 */
 		
+		System.out.println("\nCracking Code Interview: 3.5");
+		Stack<Integer> s = new Stack<Integer>();
+		s.push(12);
+		s.push(3);
+		s.push(5);
+		s.push(11);
+		s.push(4);
+		s.push(1);
+		
+		System.out.println(s);
+		sort(s);
+		System.out.println(s);
 	}
 	
+	// O(n^2) time and O(n) space
+	static void sort(Stack<Integer> s) {
+		Stack<Integer> r = new Stack<Integer>();
+		while (!s.isEmpty()) {
+			int tmp = s.pop();
+			while (!r.isEmpty() && r.peek() > tmp) {
+				s.push(r.pop());
+			}
+			r.push(tmp);
+		}
+		
+		while (!r.isEmpty()) {
+			s.push(r.pop());
+		}
+	}
+	
+}
+
+// 3.4
+class MyQueue<T> {
+	Stack<T> stackNewest, stackOldest;
+	
+	public MyQueue() {
+		stackNewest = new Stack<T>();
+		stackOldest = new Stack<T>();
+	}
+	
+	public int size() {
+		return stackNewest.size() + stackOldest.size();
+	}
+	
+	public void add(T value) {
+		// Push onto stackNewest, which always has the
+		// newest elements on top.
+		stackNewest.push(value);
+	}
+	
+	private void shiftStacks() {
+		if (stackOldest.isEmpty()) {
+			while (!stackNewest.isEmpty()) {
+				stackOldest.push(stackNewest.pop());
+			}
+		}
+	}
+	
+	public T peek() {
+		shiftStacks();
+		return stackOldest.peek();
+	}
+	
+	public T remove() {
+		shiftStacks();
+		return stackOldest.pop();
+	}
+}
+
+// 3.3
+class SetOfStacks {
+	ArrayList<SetStack> stacks = new ArrayList<SetStack>();
+	public int capacity;
+	public SetOfStacks(int capacity) {
+		this.capacity = capacity;
+	}
+	
+	public void push(int v) {
+		SetStack last = getLastStack();
+		if (last != null && !last.isFull()) {
+			last.push(v);
+		} else {
+			SetStack stack = new SetStack(capacity);
+			stack.push(v);
+			stacks.add(stack);
+		}
+	}
+	
+	public int pop() {
+		SetStack last = getLastStack();
+		if (last == null) throw new EmptyStackException();
+		int v = last.pop();
+		if (last.size == 0) {
+			stacks.remove(stacks.size() - 1);
+		}
+		return v;
+	}
+	
+	public SetStack getLastStack() {
+		if (stacks.size() == 0) return null;
+		return stacks.get(stacks.size() - 1);
+	}
+	
+	public boolean isEmpty() {
+		SetStack last = getLastStack();
+		return last == null || last.isEmpty();
+	}
+	
+	public int popAt(int index) {
+		return leftShift(index, true);
+	}
+	
+	public int leftShift(int index, boolean removeTop) {
+		SetStack stack = stacks.get(index);
+		int removed_item;
+		if (removeTop) removed_item = stack.pop();
+		else removed_item = stack.removeBottom();
+		if (stack.isEmpty()) {
+			stacks.remove(index);
+		} else if (stack.size > index + 1) {
+			int v = leftShift(index + 1, false);
+			stack.push(v);
+		}
+		return removed_item;
+	}
+}
+
+class SetStack {
+	public int capacity;
+	public SetNode top, bottom;
+	public int size = 0;
+	
+	public SetStack(int capacity) {
+		this.capacity = capacity;
+	}
+	
+	public boolean isFull() {
+		return this.size == this.capacity;
+	}
+	
+	public void join(SetNode above, SetNode below) {
+		if (below != null) below.above = above;
+		if (above != null) above.below = below;
+	}
+	
+	public boolean push(int v) {
+		if (size >= capacity) return false;
+		size++;
+		SetNode n = new SetNode(v);
+		if (size == 1) bottom = n;
+		join(n, top);
+		top = n;
+		return true;
+	}
+	
+	public int pop() {
+		SetNode t = top;
+		top = top.below;
+		size--;
+		return t.data;
+	}
+	
+	public boolean isEmpty() {
+		return size == 0;
+	}
+	
+	public int removeBottom() {
+		SetNode b = bottom;
+		bottom = bottom.above;
+		if (bottom != null) bottom.below = null;
+		size--;
+		return b.data;
+	}
+	
+}
+
+class SetNode {
+	public SetNode above, below;
+	public int data;
+	public SetNode(int d) {
+		data = d;
+	}
 }
 
 // 3.2
