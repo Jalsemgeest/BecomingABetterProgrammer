@@ -1,6 +1,7 @@
 package stacks;
 
 import java.util.EmptyStackException;
+import java.util.Stack;
 
 public class Stacks {
 
@@ -23,6 +24,38 @@ public class Stacks {
 		
 	}
 	
+}
+
+// 3.2
+class StackWithMin extends Stack<Integer> {
+	Stack<Integer> mins = new Stack<Integer>();
+	public StackWithMin() {
+		mins = new Stack<Integer>();
+	}
+	
+	public void push(int data) {
+		if (data <= mins.peek()) {
+			mins.push(data);
+		}
+		
+		super.push(data);
+	}
+	
+	public Integer pop() {
+		int value = super.pop();
+		if (value == min()) {
+			mins.pop();
+		}
+		return value;
+	}
+	
+	public Integer min() {
+		if (mins.isEmpty()) {
+			return Integer.MAX_VALUE;
+		} else {
+			return mins.peek();
+		}
+	}
 }
 
 // 3.1 - Fixed multi stack
