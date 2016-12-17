@@ -3,8 +3,6 @@ package queues;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-import stacks.Dog;
-
 public class Queues {
 
 	// Queues are FIFO (first in first out)
