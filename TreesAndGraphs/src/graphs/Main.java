@@ -3,6 +3,7 @@ package graphs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 enum State {
 	Unvisited,
@@ -19,7 +20,102 @@ public class Main {
 	}
 
 	// 4.7 - Build Order for Projects
+	// Option 2
+	static Stack<Project> finalBuildOrderTwo(String[] projects, String[][] dependencies) {
+		ProjectGraph graph = buildGraph(projects, dependencies);
+		return orderProjectsTwo(graph.getNodes());
+	}
 	
+	static Stack<Project> orderProjectsTwo(ArrayList<Project> projects) {
+		Stack<Project> stack = new Stack<Project>();
+		for (Project project : projects) {
+			if (project.getState() == Project.State.BLANK) {
+				if (!doDFS(project, stack)) {
+					return null;
+				}
+			}
+		}
+		return stack;
+	}
+	
+	static boolean doDFS(Project project, Stack<Project> stack) {
+		if (project.getState() == Project.State.PARTIAL) {
+			return false; // Cycle
+		}
+		
+		if (project.getState() == Project.State.BLANK) {
+			project.setState(Project.State.PARTIAL);
+			ArrayList<Project> children = project.getChildren();
+			
+			for (Project child : children) {
+				if (!doDFS(child, stack)) {
+					return false;
+				}
+			}
+			
+			project.setState(Project.State.COMPLETE);
+			stack.push(project);
+		}
+		
+		return true;
+	} 
+	
+	
+	// Option 1
+	static Project[] finalBuildOrder(String[] projects, String[][] dependencies) {
+		ProjectGraph graph = buildGraph(projects, dependencies);
+		return orderProjects(graph.getNodes());
+	}
+	
+	static ProjectGraph buildGraph(String[] projects, String[][] dependencies) {
+		ProjectGraph graph = new ProjectGraph();
+		for (String project : projects) {
+			graph.getOrCreateNode(project);
+		}
+		
+		for (String[] dependency : dependencies) {
+			String first = dependency[0];
+			String second = dependency[1];
+			graph.addEdge(first, second);
+		}
+		
+		return graph;
+	}
+	
+	static Project[] orderProjects(ArrayList<Project> projects) {
+		Project[] order = new Project[projects.size()];
+		
+		int endOfList = addNonDependent(order, projects, 0);
+		
+		int toBeProcessed = 0;
+		while (toBeProcessed < order.length) {
+			Project current = order[toBeProcessed];
+			
+			if (current == null) {
+				return null;
+			}
+			
+			ArrayList<Project> children = current.getChildren();
+			for (Project child : children) {
+				child.decrementDependencies();
+			}
+			
+			endOfList = addNonDependent(order, children, endOfList);
+			toBeProcessed++;
+		}
+		
+		return order;
+	}
+	
+	static int addNonDependent(Project[] order, ArrayList<Project> projects, int offset) {
+		for (Project project : projects) {
+			if (project.getNumberOfDependencies() == 0) {
+				order[offset] = project;
+				offset++;
+			}
+		}
+		return offset;
+	}
 	
 	
 	// Really just makes a list.
@@ -75,7 +171,7 @@ public class Main {
 class ProjectGraph {
 	private ArrayList<Project> nodes = new ArrayList<Project>();
 	private HashMap<String, Project> map = new HashMap<String, Project>();
-	
+
 	public Project getOrCreateNode(String name) {
 		if (!map.containsKey(name)) {
 			Project node = new Project(name);
@@ -100,6 +196,9 @@ class Project {
 	private HashMap<String, Project> map = new HashMap<String, Project>();
 	private String name;
 	private int dependencies = 0;
+	public enum State { COMPLETE, PARTIAL, BLANK };
+	
+	private State state = State.BLANK;
 	
 	public Project(String n) { name = n; }
 	
@@ -117,6 +216,14 @@ class Project {
 	
 	public void decrementDependencies() {
 		dependencies--;
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
+	public void setState(State state) {
+		this.state = state;
 	}
 	
 	public String getName() { return name; }
