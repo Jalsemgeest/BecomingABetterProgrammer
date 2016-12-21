@@ -11,6 +11,103 @@ public class Main {
 		System.out.println("\nCracking Code Interview 4.3:");
 	}
 
+	// 4.6 Find the successor of a BST Node
+	static TreeNode inOrderSuccessor(TreeNode node) {
+		if (node == null) {
+			return null;
+		}
+		
+		// Found a right child, return the left most child of that subtree.
+		if (node.right != null) {
+			return leftMostChild(node.right);
+		} else {
+			// The node is a right child
+			TreeNode q = node;
+			TreeNode x = q.parent;
+			// Go up until we're on left instead of right.
+			while (x != null && x.left != q) {
+				q = x;
+				x = x.parent;
+			}
+			return x;
+		}
+	}
+	
+	static TreeNode leftMostChild(TreeNode n) {
+		if (n == null) {
+			return null;
+		}
+		while (n.left != null) {
+			n = n.left;
+		}
+		return n;
+	}
+	
+	
+	static Integer lastPrinted = null;
+	// 4.5 - Check if BST is valid
+	// In-Order Traversal
+	static boolean checkBSTInOrder(TreeNode root) {
+		if (root == null) return true;
+		
+		// Check and recurse left
+		if (!checkBSTInOrder(root.left)) return false;
+		
+		// Check current
+		if (lastPrinted != null && root.data <= lastPrinted) {
+			return false;
+		}
+		lastPrinted = root.data;
+		
+		// Check and recurse right
+		if (!checkBSTInOrder(root.right)) return false;
+		
+		return true;
+	}
+	
+	// Min/Max Solution - awesome solution
+	static boolean checkBST(TreeNode node) {
+		return checkBST(node, null, null);
+	}
+	
+	static boolean checkBST(TreeNode node, Integer min, Integer max) {
+		if (node == null) {
+			return true;
+		}
+		
+		if ((min != null && node.data <= min) || (max != null && node.data > max)) {
+			return false;
+		}
+		
+		if (!checkBST(node.left, min, node.data) || !checkBST(node.right, node.data, max)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	static int checkHeight(TreeNode root) {
+		if (root == null) return -1;
+		
+		int leftHeight = checkHeight(root.left);
+		if (leftHeight == Integer.MIN_VALUE) return Integer.MIN_VALUE;
+		
+		int rightHeight = checkHeight(root.right);
+		if (rightHeight == Integer.MIN_VALUE) return Integer.MIN_VALUE;
+		
+		int heightDiff = leftHeight - rightHeight;
+		if (Math.abs(heightDiff) > 1) {
+			return Integer.MIN_VALUE;
+		} else {
+			return Math.max(leftHeight, rightHeight) + 1;
+		}
+	}
+	
+	static boolean isBalanced(TreeNode root) {
+		return checkHeight(root) != Integer.MIN_VALUE;
+	}
+	
 	// Breadth First Search Implementation 4.3.
 	static ArrayList<LinkedList<TreeNode>> createLevelLinkedListBFS(TreeNode root) {
 		ArrayList<LinkedList<TreeNode>> result = new ArrayList<LinkedList<TreeNode>>();
@@ -78,6 +175,7 @@ class TreeNode {
 	public int data;
 	public TreeNode left = null;
 	public TreeNode right = null;
+	public TreeNode parent = null;
 	
 	public TreeNode() {
 		
