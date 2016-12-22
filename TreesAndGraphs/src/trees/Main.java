@@ -1,7 +1,9 @@
 package trees;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Main {
 	// Chapter 4 (pg. 112)
@@ -15,7 +17,7 @@ public class Main {
 
 	// Approach 2 - Optimized
 	static int countPathsWithSumOptimized(TreeNode root, int targetSum) {
-		return countPathsWithSum(TreeNode root, targetSum, 0, new HashMap<Integer, Integer>());
+		return countPathsWithSum(root, targetSum, 0, new HashMap<Integer, Integer>());
 	}
 
 	static int countPathsWithSum(TreeNode node, int targetSum, int runningSum, HashMap<Integer, Integer> pathCount) {
@@ -92,7 +94,7 @@ public class Main {
 
 	static boolean subTree(TreeNode t1, TreeNode t2) {
 		if (t1 == null) {
-			return false // big tree empty && subtree still not found.
+			return false; // big tree empty && subtree still not found.
 		} else if (t1.data == t2.data && matchTree(t1, t2)) {
 			return true;
 		}
@@ -119,7 +121,7 @@ public class Main {
 		getOrderString(t1, string1);
 		getOrderString(t2, string2);
 
-		return s1.indexOf(string2.toString()) != -1;
+		return string1.indexOf(string2.toString()) != -1;
 	}
 
 	static void getOrderString(TreeNode node, StringBuilder sb) {
@@ -127,7 +129,7 @@ public class Main {
 			sb.append("X");
 			return;
 		}
-		sp.append(node.data + " ");
+		sb.append(node.data + " ");
 		getOrderString(node.left, sb);
 		getOrderString(node.right, sb);
 	}
@@ -161,7 +163,7 @@ public class Main {
 	}
 
 	// Weaves lists together. Works by removing head of one list, recursing, and then doing it to the other list.
-	static void weaveLists(ArrayList<Integer> first, ArrayList<Integer> second, ArrayList<LinkedList<Integer>> results, LinkedList<Integer> prefix) {
+	static void weaveLists(LinkedList<Integer> first, LinkedList<Integer> second, ArrayList<LinkedList<Integer>> results, LinkedList<Integer> prefix) {
 		// One list is empty, add remainder to a cloned prefix and store the result.
 		if (first.size() == 0 || second.size() == 0) {
 			LinkedList<Integer> result = (LinkedList<Integer>) prefix.clone();
@@ -173,18 +175,18 @@ public class Main {
 
 		// Recurse with head of first added to prefix.  Removing the head will
 		// damage first, so we'll put it back where we found it afterwards.
-		int headFirst = first.removeFirst();
+		int headFirst = first.remove(0);
 		prefix.addLast(headFirst);
 		weaveLists(first, second, results, prefix);
 		prefix.removeLast();
-		first.addFirst(headFirst);
+		first.add(0, headFirst);
 
 		// Do the same thing with second.
-		int headSecond = second.removeFirst();
+		int headSecond = second.remove(0);
 		prefix.addLast(headSecond);
 		weaveLists(first, second, results, prefix);
 		prefix.removeLast();
-		second.addFirst(headSecond);
+		second.add(0, headSecond);
 	}
 
 	// 4.8 - Find Common Ancestor of non-BST
@@ -298,7 +300,7 @@ public class Main {
 		return first == null || second == null ? null : first;
 	}
 
-	static goUpBy(TreeNode node, int delta) {
+	static TreeNode goUpBy(TreeNode node, int delta) {
 		while (delta > 0 && node != null) {
 			node = node.parent;
 			delta--;
@@ -482,16 +484,17 @@ class TreeRandom {
 
 	public int size() { return root == null ? 0 : root.size(); }
 
-	public TreeNode getRandomNode() {
+	public TreeNodeRandom getRandomNode() {
 		if (root == null) return null;
 
 		Random random = new Random();
 		int i = random.nextInt(size());
+		return root.getIthNode(i);
 	}
 
 	public void insertInOrder(int value) {
 		if (root == null) {
-			root = new TreeNode(value);
+			root = new TreeNodeRandom(value);
 		} else {
 			root.insertInOrder(value);
 		}
@@ -504,12 +507,12 @@ class TreeNodeRandom {
 	public TreeNodeRandom right;
 	private int size = 0;
 
-	public TreeNode(int d) {
+	public TreeNodeRandom(int d) {
 		data = d;
 		size = 1;
 	}
 
-	public TreeNode getIthNode(int i) {
+	public TreeNodeRandom getIthNode(int i) {
 		int leftSize = left == null ? 0 : left.size();
 		if (i < leftSize) {
 			return left.getIthNode(i);
@@ -546,7 +549,7 @@ class TreeNodeRandom {
 		return data;
 	}
 
-	public TreeNode find(int d) {
+	public TreeNodeRandom find(int d) {
 		if (d == data) {
 			return this;
 		} else if (d <= data) {
